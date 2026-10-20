@@ -1,3 +1,4 @@
+from prompts import *
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -12,7 +13,7 @@ def main():
     # this allows flag '--verbose' to be used in command line
     args = parser.parse_args()
     # 'args=' must be after all args are defined
-    print("Hello from your-project-name!")
+    print("My name is Jarvis how can I be of assistance?")
     load_dotenv()
     api_key = os.environ.get("OPENROUTER_API_KEY")
 
@@ -25,12 +26,14 @@ def main():
     )
 
     messages = [
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": args.user_prompt},
     ]
 
     response = client.chat.completions.create(
         model="openrouter/free",
         messages=messages,
+        temperature=0,
     )
 
     if response.usage.total_tokens == None:
