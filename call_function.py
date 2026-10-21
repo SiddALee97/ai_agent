@@ -40,7 +40,7 @@ def call_function(tool_call, verbose: bool = False) -> dict:
             "content": f"Error: Unknown function: {function_name}",
         }
 
-    # adding the working directory arg to all function calls
+    # specifying the working directory arg to all function calls (putting Jarvis in a box)
     function_args["working_directory"] = "./calculator"
 
     # calling the function
