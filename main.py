@@ -1,3 +1,4 @@
+import sys
 import json
 from call_function import *
 from prompts import *
@@ -32,40 +33,42 @@ def main():
         {"role": "user", "content": args.user_prompt},
     ]
 
-    response = client.chat.completions.create(
-        model="openrouter/free",
-        messages=messages,
-        temperature=0,
-        tools=available_functions,
-    )
+    for _ in range (20):
+        response = client.chat.completions.create(
+            model="openrouter/free",
+            messages=messages,
+            temperature=0,
+            tools=available_functions,
+        )
 
-    if response.usage.total_tokens == None:
-        raise RuntimeError("failed API request")
+        if response.usage.total_tokens == None:
+            raise RuntimeError("failed API request")
 
-    if args.verbose:
-        print(f"User prompt: {args.user_prompt}")
-        print(f"Prompt tokens: {response.usage.prompt_tokens}")
-        print(f"Response tokens: {response.usage.completion_tokens}")
-
-
-    message = response.choices[0].message
-    if message.tool_calls != None:
-        for tool_call in message.tool_calls:
-            function_args = json.loads(tool_call.function.arguments or "{}")
-            result_message = call_function(tool_call, args.verbose)
-            if result_message["content"] == "":
-                raise Exception("WTF")
-            if args.verbose:
-                print(f"-> {result_message['content']}")
-
-    else:
-        print(f"Response: {response.choices[0].message.content}")
+        if args.verbose:
+            print(f"User prompt: {args.user_prompt}")
+            print(f"Prompt tokens: {response.usage.prompt_tokens}")
+            print(f"Response tokens: {response.usage.completion_tokens}")
 
 
+        message = response.choices[0].message
+        messages.append(message)
 
+        if message.tool_calls:
+            for tool_call in message.tool_calls:
+                function_args = json.loads(tool_call.function.arguments or "{}")
+                result_message = call_function(tool_call, args.verbose)
+                messages.append(result_message)
+                if result_message["content"] == "":
+                    raise Exception("WTF")
+                if args.verbose:
+                    print(f"-> {result_message['content']}")
 
+        else:
+            print(f"Final response:\n{message.content}")
+            return
 
-
+    print("Maximum iterations reached")
+    sys.exit(1)
 
 if __name__ == "__main__":
     main()
