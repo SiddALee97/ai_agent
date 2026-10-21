@@ -12,7 +12,7 @@ def get_file_content(working_directory: str, file_path: str) -> str:
             return (f'Error: File not found or is not a regular file: "{file_path}"')
 
         content = open(target_path).read(MAX_CHARS)
-        if open(target_path).read(MAX_CHARS + 1):
+        if len(content) > 10000:
             content += f'[...File "{file_path}" truncated at {MAX_CHARS} characters]'
 
         return content
@@ -29,7 +29,7 @@ schema_get_file_content = {
         "parameters": {
             "type": "object",
             "properties": {
-                "fiel_path": {
+                "file_path": {
                     "type": "string",
                     "description": "File path to read, relative to the working directory (default is the working directory itself)",
                 },

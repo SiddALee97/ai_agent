@@ -1,5 +1,5 @@
 import json
-from call_function import available_functions
+from call_function import *
 from prompts import *
 import os
 from dotenv import load_dotenv
@@ -52,7 +52,12 @@ def main():
     if message.tool_calls != None:
         for tool_call in message.tool_calls:
             function_args = json.loads(tool_call.function.arguments or "{}")
-            print(f"Calling function: {tool_call.function.name}({function_args})")
+            result_message = call_function(tool_call, args.verbose)
+            if result_message["content"] == "":
+                raise Exception("WTF")
+            if args.verbose:
+                print(f"-> {result_message['content']}")
+
     else:
         print(f"Response: {response.choices[0].message.content}")
 
